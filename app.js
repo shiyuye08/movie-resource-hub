@@ -1518,7 +1518,7 @@ function makePosterPlaceholder(m, wide){
   const lines = wrapText(m.title || "", maxChars).slice(0, wide ? 3 : 4);
   const tSize = wide ? 58 : 46;
   const lh = tSize * 1.18;
-  const baseY = h * (wide ? 0.60 : 0.58);
+  const baseY = h * (wide ? 0.52 : 0.50);
   const titleSVG = lines.map((ln, i) => {
     const y = baseY - (lines.length - 1) * lh / 2 + i * lh;
     return `<text x="${cx}" y="${y}" font-size="${tSize}" font-weight="800" fill="#fff" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" style="paint-order:stroke;stroke:rgba(0,0,0,.42);stroke-width:${tSize*0.07}px;">${svgEsc(ln)}</text>`;
@@ -1633,8 +1633,8 @@ function sectionBanner(key){
     + `<radialGradient id="vg" cx="72%" cy="38%" r="80%">`
     + `<stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient></defs>`
     + `<rect width="${w}" height="${h}" fill="url(#bg)"/>${motif}`
-    + `<text x="32" y="${cy-4}" font-size="50" font-weight="800" fill="#fff" font-family="'PingFang SC','Microsoft YaHei',sans-serif" style="paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:3px;">${svgEsc(c.label)}</text>`
-    + (c.en ? `<text x="34" y="${cy+32}" font-size="20" letter-spacing="3" fill="rgba(255,255,255,.85)" font-family="sans-serif">${svgEsc(c.en)}</text>` : "")
+    + `<text x="32" y="${cy-9}" font-size="50" font-weight="800" fill="#fff" font-family="'PingFang SC','Microsoft YaHei',sans-serif" style="paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:3px;">${svgEsc(c.label)}</text>`
+    + (c.en ? `<text x="34" y="${cy+21}" font-size="20" letter-spacing="3" fill="rgba(255,255,255,.85)" font-family="sans-serif">${svgEsc(c.en)}</text>` : "")
     + `<rect width="${w}" height="${h}" fill="url(#vg)"/></svg>`;
   const uri = svgToDataUri(svg);
   // 随机填充兜底：从栏目名派生一个稳定但“看起来随机”的色相
