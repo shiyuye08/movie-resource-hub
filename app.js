@@ -813,7 +813,7 @@ function makePosterPlaceholder(m, wide){
   const badge = `<g><rect x="${cx-96}" y="${badgeY-26}" width="192" height="52" rx="26" fill="rgba(0,0,0,.42)" stroke="rgba(255,255,255,.75)" stroke-width="2"/><text x="${cx}" y="${badgeY+9}" font-size="${wide?30:24}" font-weight="800" fill="#fff" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif">${svgEsc(st)}</text></g>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`
     + `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">`
-    + `<stop offset="0" stop-color="hsl(${hue},58%,46%)"/><stop offset="1" stop-color="hsl(${h2},64%,13%)"/></linearGradient>`
+    + `<stop offset="0" stop-color="hsl(${hue},48%,40%)"/><stop offset=".55" stop-color="hsl(${(hue+38)%360},52%,24%)"/><stop offset="1" stop-color="hsl(${(hue+78)%360},58%,12%)"/></linearGradient>`
     + `<radialGradient id="v" cx="50%" cy="36%" r="82%">`
     + `<stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".52"/></radialGradient>`
     + `<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>`

@@ -5,7 +5,7 @@
   background-size: cover; background-position: center; background-repeat: no-repeat;
   filter: blur(55px) saturate(1.25);
   transform: scale(1.18);            /* 放大避免模糊后边缘露白 */
-  opacity: .32;                       /* 白天：淡 */
+  opacity: .26;                       /* 白天：淡 */
   transition: background-image .7s ease, opacity .4s ease;
 }
 body.night #bgLayer { opacity: .40; } /* 夜晚：稍强 */
@@ -15,12 +15,12 @@ body.night #bgLayer { opacity: .40; } /* 夜晚：稍强 */
 
 /* ===== 全局与变量 ===== */
 :root {
-  --bg: #f4f5f7;
-  --bg-soft: #ffffff;
-  --text: #1a1a1a;
-  --text-soft: #6b7280;
-  --line: #e5e7eb;
-  --nav-bg: #ffffff;
+  --bg: #e9ecf1;
+  --bg-soft: #f7f8fb;
+  --text: #23262b;
+  --text-soft: #4b5563;
+  --line: #dde1e7;
+  --nav-bg: #f7f8fb;
   --accent: #e74c3c;
   --accent-soft: #ff6b6b;
   --chip: #eef1f5;
