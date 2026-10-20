@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 不发 Referer，避免 B 站等图床按来源防盗链（403）拦截海报；实测无 Referer 可正常加载 -->
+  <meta name="referrer" content="no-referrer" />
+  <title>影视资源库 · 聚合五大平台电影</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 全站背景层：取电影宣传图（模糊+低透明度），由 JS 切换 -->
+  <div id="bgLayer" aria-hidden="true"></div>
+
+  <!-- 顶部导航栏 -->
+  <header class="topbar">
+    <div class="brand">🎬 影视资源库</div>
+
+    <div class="search">
+      <span class="search-ico">🔍</span>
+      <input id="searchInput" type="text" placeholder="搜索电影 / 导演…" autocomplete="off" />
+      <button id="searchBtn" class="search-btn">搜索</button>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-btn active" data-view="recommend">今日推荐</button>
+      <button class="nav-btn" data-view="category">分类</button>
+      <button class="nav-btn" data-view="history">历史记录</button>
+      <button class="nav-btn" data-view="favorite">个人关注</button>
+      <button class="nav-btn" data-view="space">个人空间</button>
+    </nav>
+
+    <button id="themeBtn" class="theme-toggle" title="切换白天/夜晚模式">☀</button>
+  </header>
+
+  <!-- 主内容区：由 JS 渲染 -->
+  <main id="app"></main>
+
+  <!-- 通用弹窗（删除确认 / 人物信息） -->
+  <div id="modalMask" class="modal-mask hidden">
+    <div class="modal-box">
+      <div id="modalBody" class="modal-body"></div>
+      <div id="modalActions" class="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- 登录 / 欢迎界面（首次以匿名游客身份进入时展示） -->
+  <div id="loginScreen" class="login-screen hidden"></div>
+
+  <script src="posters/local.js?v=1"></script>
+  <script src="app.js?v=31"></script>
+</body>
+</html>
