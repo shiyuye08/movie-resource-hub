@@ -94,12 +94,14 @@ button { font-family: inherit; cursor: pointer; }
 .view-title { font-size: 22px; font-weight: 700; margin: 0 0 16px; }
 .section-label { font-size: 16px; font-weight: 600; margin: 26px 0 12px; color: var(--text-soft); }
 /* 分区（栏目）标题 + 封面头图 */
-.section-head { display: flex; align-items: center; gap: 12px; margin: 26px 0 12px; }
+.section-head { display: flex; align-items: center; gap: 16px; margin: 30px 0 14px; }
 .section-head .section-label { margin: 0; }   /* 抵消自身 margin，交给 flex 容器统一控制 */
 .section-cover {
-  width: 150px; height: 76px; flex: 0 0 auto; border-radius: 10px;
+  width: 208px; height: 116px; flex: 0 0 auto; border-radius: 14px;
   box-shadow: var(--shadow); background-color: var(--chip);
+  transition: transform .2s ease;
 }
+.section-cover:hover { transform: translateY(-2px); }
 
 /* ===== 今日推荐「查看更多」按钮 ===== */
 .view-more-wrap { display: flex; justify-content: center; margin: 34px 0 8px; }
