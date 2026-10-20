@@ -97,7 +97,7 @@ button { font-family: inherit; cursor: pointer; }
 .section-head { display: flex; align-items: center; gap: 12px; margin: 26px 0 12px; }
 .section-head .section-label { margin: 0; }   /* 抵消自身 margin，交给 flex 容器统一控制 */
 .section-cover {
-  width: 52px; height: 74px; flex: 0 0 auto; border-radius: 8px;
+  width: 150px; height: 76px; flex: 0 0 auto; border-radius: 10px;
   box-shadow: var(--shadow); background-color: var(--chip);
 }
 
