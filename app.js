@@ -747,35 +747,51 @@ function wrapText(text, max){
    构图：专属配色渐变 + 暗角 + 胶片颗粒 + 胶片齿孔 + 按影片主类型变化的主体图形
          + 片名（自动换行）/ 年份·地区 / 导演｜类型，使其看起来像一张为该片定制的海报。
    若要换成真实照片，把 URL 填进 POSTER_MAP，或在 posters/local.js 登记本地官方图即可，本函数会自动让位。 */
+/* 按影片主类型绘制一张“分类相关”的主题插画（纯 SVG，零版权、离线可显示）。
+   顶部徽标由 makePosterPlaceholder 叠加，这里只负责中部主体图形。 */
+function genreMotif(st, cx, cy, s, wide){
+  const sw = s * 0.012 + 2;
+  const W = `stroke="#fff" stroke-opacity=".5" fill="none" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
+  const F = `fill="#fff" fill-opacity=".42"`;
+  switch(st){
+    case "动画": return `<g ${W}><circle cx="${cx}" cy="${cy}" r="${s*0.2}"/><circle cx="${cx}" cy="${cy}" r="${s*0.32}" stroke-dasharray="${s*0.05} ${s*0.045}"/></g>`
+      + `<g ${F}><circle cx="${cx-s*0.07}" cy="${cy-s*0.03}" r="${s*0.022}"/><circle cx="${cx+s*0.07}" cy="${cy-s*0.03}" r="${s*0.022}"/></g>`
+      + `<path d="M ${cx-s*0.12} ${cy+s*0.08} Q ${cx} ${cy+s*0.16} ${cx+s*0.12} ${cy+s*0.08}" ${W}/>`;
+    case "科幻": return `<g ${W}><ellipse cx="${cx}" cy="${cy}" rx="${s*0.34}" ry="${s*0.12}" transform="rotate(-18 ${cx} ${cy})"/>`
+      + `<ellipse cx="${cx}" cy="${cy}" rx="${s*0.23}" ry="${s*0.08}" transform="rotate(26 ${cx} ${cy})"/></g>`
+      + `<circle cx="${cx+s*0.2}" cy="${cy-s*0.12}" r="${s*0.06}" ${F}/>`
+      + `<g ${F}>${Array.from({length:12},(_,i)=>{const a=Math.PI*2*i/12,r=s*(0.34+(i%2)*0.03);return `<circle cx="${(cx+Math.cos(a)*r).toFixed(1)}" cy="${(cy+Math.sin(a)*r).toFixed(1)}" r="${s*0.007}"/>`;}).join("")}</g>`;
+    case "爱情": return `<path d="M ${cx} ${cy+s*0.16} C ${cx-s*0.24} ${cy-s*0.05}, ${cx-s*0.08} ${cy-s*0.22}, ${cx} ${cy-s*0.02} C ${cx+s*0.08} ${cy-s*0.22}, ${cx+s*0.24} ${cy-s*0.05}, ${cx} ${cy+s*0.16} Z" ${F}/>`;
+    case "犯罪":
+    case "悬疑": return `<g ${W}>${Array.from({length:9},(_,i)=>`<line x1="${cx-s*0.3}" y1="${(cy-s*0.22+i*s*0.055).toFixed(1)}" x2="${cx+s*0.3}" y2="${(cy-s*0.22+i*s*0.055).toFixed(1)}"/>`).join("")}</g>`
+      + `<circle cx="${cx+s*0.12}" cy="${cy-s*0.04}" r="${s*0.05}" ${F}/>`;
+    case "战争":
+    case "历史": return `<g ${W}><path d="M ${cx} ${cy-s*0.18} L ${cx+s*0.16} ${cy-s*0.02} L ${cx+s*0.1} ${cy+s*0.2} L ${cx-s*0.1} ${cy+s*0.2} L ${cx-s*0.16} ${cy-s*0.02} Z"/></g>`
+      + `<path d="M ${cx} ${cy-s*0.1} L ${cx} ${cy+s*0.16}" ${W}/>`;
+    case "喜剧": return `<g ${F}><circle cx="${cx}" cy="${cy-s*0.02}" r="${s*0.18}"/></g>`
+      + `<g ${W}><path d="M ${cx-s*0.1} ${cy-s*0.05} a ${s*0.03} ${s*0.03} 0 1 0 ${s*0.06} 0 M ${cx+s*0.04} ${cy-s*0.05} a ${s*0.03} ${s*0.03} 0 1 0 ${s*0.06} 0"/></g>`
+      + `<path d="M ${cx-s*0.09} ${cy+s*0.04} Q ${cx} ${cy+s*0.13} ${cx+s*0.09} ${cy+s*0.04}" ${W}/>`;
+    case "动作": return `<path d="M ${cx+s*0.05} ${cy-s*0.22} L ${cx-s*0.16} ${cy+s*0.05} L ${cx-s*0.04} ${cy+s*0.05} L ${cx-s*0.12} ${cy+s*0.22} L ${cx+s*0.18} ${cy-s*0.06} L ${cx+s*0.05} ${cy-s*0.06} Z" ${F}/>`;
+    case "恐怖": return `<path d="M ${cx} ${cy-s*0.18} a ${s*0.14} ${s*0.14} 0 1 0 ${s*0.001} 0 Z" ${F}/>`
+      + `<g ${W}><circle cx="${cx-s*0.05}" cy="${cy-s*0.03}" r="${s*0.018}"/><circle cx="${cx+s*0.05}" cy="${cy-s*0.03}" r="${s*0.018}"/></g>`;
+    case "奇幻":
+    case "冒险": return `<g ${W}><path d="M ${cx} ${cy-s*0.2} L ${cx+s*0.14} ${cy+s*0.04} L ${cx+s*0.05} ${cy+s*0.04} L ${cx+s*0.2} ${cy+s*0.2} L ${cx-s*0.2} ${cy+s*0.2} L ${cx-s*0.05} ${cy+s*0.04} L ${cx-s*0.14} ${cy+s*0.04} Z"/></g>`;
+    case "家庭": return `<g ${W}><path d="M ${cx-s*0.18} ${cy+s*0.18} L ${cx-s*0.18} ${cy-s*0.02} L ${cx} ${cy-s*0.2} L ${cx+s*0.18} ${cy-s*0.02} L ${cx+s*0.18} ${cy+s*0.18} Z"/></g>`
+      + `<path d="M ${cx} ${cy-s*0.02} l ${s*0.06} ${s*0.06} l ${s*0.06} -${s*0.06} l -${s*0.06} ${s*0.06} l -${s*0.06} -${s*0.06} Z" ${F}/>`;
+    case "音乐":
+    case "歌舞": return `<g ${F}><circle cx="${cx-s*0.06}" cy="${cy+s*0.12}" r="${s*0.05}"/><circle cx="${cx+s*0.1}" cy="${cy+s*0.12}" r="${s*0.05}"/></g>`
+      + `<g ${W}><rect x="${cx-s*0.12}" y="${cy-s*0.16}" width="${s*0.04}" height="${s*0.28}"/><rect x="${cx+s*0.06}" y="${cy-s*0.16}" width="${s*0.04}" height="${s*0.28}"/></g>`;
+    case "武侠": return `<g ${W}><path d="M ${cx-s*0.22} ${cy+s*0.18} L ${cx+s*0.2} ${cy-s*0.2}"/><path d="M ${cx+s*0.2} ${cy-s*0.2} l -${s*0.06} ${s*0.01} l ${s*0.02} ${s*0.06} Z" ${F}/><circle cx="${cx-s*0.22}" cy="${cy+s*0.18}" r="${s*0.03}" ${F}/></g>`;
+    default: return `<g ${W}><rect x="${cx-s*0.22}" y="${cy-s*0.16}" width="${s*0.44}" height="${s*0.32}" rx="${s*0.04}"/><line x1="${cx}" y1="${cy-s*0.16}" x2="${cx}" y2="${cy+s*0.16}"/><circle cx="${cx-s*0.11}" cy="${cy}" r="${s*0.05}"/><circle cx="${cx+s*0.11}" cy="${cy}" r="${s*0.05}"/></g>`;
+  }
+}
+
 function makePosterPlaceholder(m, wide){
   const w = wide ? 960 : 400, h = wide ? 540 : 600;
   const hue = hueOf(m.id), h2 = (hue + 35) % 360;
   const st = (m.styles && m.styles[0]) || "剧情";
   const cx = w / 2, cy = h / 2, s = Math.min(w, h);
-  let motif = "";
-  if (st === "动画"){
-    motif = `<circle cx="${cx}" cy="${cy}" r="${s*0.17}" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="7"/>
-      <circle cx="${cx}" cy="${cy}" r="${s*0.29}" fill="none" stroke="#fff" stroke-opacity=".26" stroke-width="3" stroke-dasharray="11 13"/>`;
-  } else if (st === "科幻"){
-    motif = `<ellipse cx="${cx}" cy="${cy}" rx="${s*0.33}" ry="${s*0.11}" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="4" transform="rotate(-20 ${cx} ${cy})"/>
-      <ellipse cx="${cx}" cy="${cy}" rx="${s*0.24}" ry="${s*0.08}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="3" transform="rotate(28 ${cx} ${cy})"/>
-      <circle cx="${cx}" cy="${cy}" r="${s*0.09}" fill="#fff" fill-opacity=".3"/>`;
-  } else if (st === "爱情"){
-    motif = `<path d="M ${cx} ${cy+s*0.15} C ${cx-s*0.22} ${cy-s*0.06}, ${cx-s*0.07} ${cy-s*0.21}, ${cx} ${cy-s*0.01} C ${cx+s*0.07} ${cy-s*0.21}, ${cx+s*0.22} ${cy-s*0.06}, ${cx} ${cy+s*0.15} Z" fill="#fff" fill-opacity=".42"/>`;
-  } else if (st === "犯罪" || st === "悬疑"){
-    motif = `<g fill="#fff" fill-opacity=".16">${
-      Array.from({length:10}, (_, i) => `<rect x="0" y="${i*h/10}" width="${w}" height="${h/20}"/>`).join("")}</g>`;
-  } else if (st === "战争" || st === "历史"){
-    motif = `<g stroke="#fff" stroke-opacity=".34" stroke-width="4" fill="none">
-      <path d="M ${cx-s*0.26} ${cy+s*0.14} L ${cx-s*0.26} ${cy-s*0.12} L ${cx} ${cy+s*0.02} L ${cx+s*0.26} ${cy-s*0.12} L ${cx+s*0.26} ${cy+s*0.14} Z"/></g>`;
-  } else {
-    motif = `<circle cx="${cx}" cy="${cy}" r="${s*0.19}" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="8"/>
-      <circle cx="${cx}" cy="${cy}" r="${s*0.055}" fill="#fff" fill-opacity=".34"/>${
-      Array.from({length:8}, (_, i) => {
-        const a = Math.PI * 2 * i / 8;
-        return `<circle cx="${cx + Math.cos(a)*s*0.27}" cy="${cy + Math.sin(a)*s*0.27}" r="6" fill="#fff" fill-opacity=".4"/>`;
-      }).join("")}`;
-  }
+  const motif = genreMotif(st, cx, cy, s, wide);
   const maxChars = wide ? 11 : 7;
   const lines = wrapText(m.title || "", maxChars).slice(0, wide ? 3 : 4);
   const tSize = wide ? 58 : 46;
@@ -793,6 +809,8 @@ function makePosterPlaceholder(m, wide){
   const holes = Array.from({length: Math.floor(w/34)}, (_, i) =>
     `<rect x="${8 + i*34}" y="10" width="16" height="12" rx="3" fill="#000" fill-opacity=".42"/>` +
     `<rect x="${8 + i*34}" y="${h-22}" width="16" height="12" rx="3" fill="#000" fill-opacity=".42"/>`).join("");
+  const badgeY = wide ? 46 : 40;
+  const badge = `<g><rect x="${cx-96}" y="${badgeY-26}" width="192" height="52" rx="26" fill="rgba(0,0,0,.42)" stroke="rgba(255,255,255,.75)" stroke-width="2"/><text x="${cx}" y="${badgeY+9}" font-size="${wide?30:24}" font-weight="800" fill="#fff" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif">${svgEsc(st)}</text></g>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`
     + `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">`
     + `<stop offset="0" stop-color="hsl(${hue},58%,46%)"/><stop offset="1" stop-color="hsl(${h2},64%,13%)"/></linearGradient>`
@@ -800,7 +818,7 @@ function makePosterPlaceholder(m, wide){
     + `<stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".52"/></radialGradient>`
     + `<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>`
     + `<feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter></defs>`
-    + `<rect width="${w}" height="${h}" fill="url(#g)"/>${motif}${titleSVG}${metaSVG}`
+    + `<rect width="${w}" height="${h}" fill="url(#g)"/>${badge}${motif}${titleSVG}${metaSVG}`
     + `<rect width="${w}" height="${h}" fill="url(#v)"/>`
     + `<rect width="${w}" height="${h}" filter="url(#n)" opacity="0.5"/>`
     + `${holes}</svg>`;
