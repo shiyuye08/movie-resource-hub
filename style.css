@@ -89,7 +89,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ===== 通用容器 ===== */
-#app { padding: 22px; max-width: 1280px; margin: 0 auto; transition: opacity .5s ease; }
+#app { padding: 22px; max-width: 1280px; margin: 0 auto; transition: opacity .35s ease; }
 #app.fading { opacity: 0; }
 .view-title { font-size: 22px; font-weight: 700; margin: 0 0 16px; }
 .section-label { font-size: 16px; font-weight: 600; margin: 26px 0 12px; color: var(--text-soft); }
@@ -241,6 +241,13 @@ button { font-family: inherit; cursor: pointer; }
 .chip.on { background: var(--chip-active); color: var(--chip-active-text); border-color: var(--chip-active); }
 .cat-result { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
 .cat-result .pcard { flex: 0 0 200px; height: 130px; }
+.cat-more-wrap { width: 100%; display: flex; justify-content: center; margin: 22px 0 6px; }
+.cat-load-more {
+  padding: 11px 28px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg-soft); color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background .2s, transform .2s; box-shadow: var(--shadow);
+}
+.cat-load-more:hover { background: var(--chip); transform: translateY(-1px); }
 .empty-tip {
   margin-top: 30px; padding: 40px; text-align: center;
   color: var(--text-soft); font-size: 16px; border: 1px dashed var(--line);

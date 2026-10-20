@@ -1745,6 +1745,17 @@ const YEAR_GROUPS = [
   { label:"2010年以后", test:y=>y>=2010 }
 ];
 let catFilters = { year:null, region:null, styles:[] };
+let catPage = 1;                       // 分类结果分页：首屏只渲染前 N 张，避免一次性 1200 卡顿
+const CAT_PAGE_SIZE = 60;
+
+function categoryResult(){
+  return MOVIE_DATA.filter(m => {
+    if (catFilters.year && !YEAR_GROUPS.find(g=>g.label===catFilters.year).test(m.year)) return false;
+    if (catFilters.region && m.region !== catFilters.region) return false;
+    if (catFilters.styles.length && !catFilters.styles.every(s => m.styles.includes(s))) return false;
+    return true;
+  });
+}
 
 function renderCategory(){
   const regions = [...new Set(MOVIE_DATA.map(m=>m.region))];
@@ -1757,16 +1768,14 @@ function renderCategory(){
   const styleChips = styles.map(s =>
     `<button class="chip ${catFilters.styles.includes(s)?'on':''}" data-style="${esc(s)}">${s}</button>`).join("");
 
-  // 过滤
-  let result = MOVIE_DATA.filter(m => {
-    if (catFilters.year && !YEAR_GROUPS.find(g=>g.label===catFilters.year).test(m.year)) return false;
-    if (catFilters.region && m.region !== catFilters.region) return false;
-    if (catFilters.styles.length && !catFilters.styles.every(s => m.styles.includes(s))) return false;
-    return true;
-  });
+  // 过滤 + 分页：首屏只渲染前 CAT_PAGE_SIZE 张，剩余由「加载更多」按需追加
+  const result = categoryResult();
+  const shown = result.slice(0, catPage * CAT_PAGE_SIZE);
+  const hasMore = result.length > shown.length;
 
   const resultHTML = result.length
-    ? `<div class="cat-result">${result.map(m=>cardHTML(m)).join("")}</div>`
+    ? `<div class="cat-result">${shown.map(m=>cardHTML(m)).join("")}</div>`
+      + (hasMore ? `<div class="cat-more-wrap"><button class="cat-load-more" id="catLoadMore">加载更多电影（已显示 ${shown.length} / ${result.length}）</button></div>` : "")
     : `<div class="empty-tip">没有找到对应电影</div>`;
 
   app.innerHTML = `
@@ -1776,6 +1785,22 @@ function renderCategory(){
     <div class="filter-group"><h4>按风格（可多选）</h4><div class="chips" id="styleChips">${styleChips}</div></div>
     ${resultHTML}
   `;
+}
+
+/* 分类「加载更多」：只追加下一批卡片，不重建筛选区，避免整页重绘 */
+function loadMoreCategory(){
+  catPage += 1;
+  const result = categoryResult();
+  const shown = result.slice(0, catPage * CAT_PAGE_SIZE);
+  const box = $(".cat-result");
+  if (!box) return;
+  box.insertAdjacentHTML("beforeend", shown.slice((catPage-1)*CAT_PAGE_SIZE).map(m=>cardHTML(m)).join(""));
+  const btn = $("#catLoadMore");
+  if (result.length > shown.length){
+    if (btn) btn.textContent = `加载更多电影（已显示 ${shown.length} / ${result.length}）`;
+  } else if (btn){
+    btn.remove();
+  }
 }
 
 /* ---------- 视图：历史记录 ---------- */
@@ -2164,12 +2189,12 @@ function showPerson(name){
 /* ---------- 视图路由 ---------- */
 /* 视图切换的透明过渡：淡出 .5s + 切换内容 + 淡入 .5s，共约 1 秒 */
 function navigateWithFade(renderFn){
-  app.classList.add("fading");                 // #app 透明度 → 0（约 .5s）
+  app.classList.add("fading");                 // #app 透明度 → 0（约 .35s）
   setTimeout(() => {
     renderFn();                                // 完全透明时替换内容
     window.scrollTo(0,0);
-    setTimeout(() => app.classList.remove("fading"), 50);  // 透明度 → 1（约 .5s）
-  }, 500);
+    setTimeout(() => app.classList.remove("fading"), 30);  // 透明度 → 1（约 .35s）
+  }, 320);
 }
 
 function showView(view){
@@ -2179,7 +2204,7 @@ function showView(view){
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view===view));
   navigateWithFade(() => {
     if (view==="recommend") renderRecommend(true);
-    else if (view==="category") renderCategory();
+    else if (view==="category"){ catPage = 1; renderCategory(); }
     else if (view==="history") renderHistory();
     else if (view==="favorite") renderFavorite();
     else if (view==="space") renderSpace();
@@ -2230,6 +2255,9 @@ function bindEvents(){
     const card = e.target.closest(".pcard");
     if (card){ openDetail(+card.dataset.id); return; }
 
+    // 分类「加载更多电影」
+    if (e.target.closest("#catLoadMore")){ loadMoreCategory(); return; }
+
     // 今日推荐「查看更多」→ 跳转到分类
     if (e.target.closest("#viewMoreBtn")){ showView("category"); return; }
 
@@ -2242,12 +2270,12 @@ function bindEvents(){
     }
 
     // 分类筛选 chips
-    const yc = e.target.closest("[data-year]");
-    if (yc){ catFilters.year = catFilters.year===yc.dataset.year ? null : yc.dataset.year; renderCategory(); return; }
-    const rc = e.target.closest("[data-region]");
-    if (rc){ catFilters.region = catFilters.region===rc.dataset.region ? null : rc.dataset.region; renderCategory(); return; }
-    const sc = e.target.closest("[data-style]");
-    if (sc){ const s=sc.dataset.style; const i=catFilters.styles.indexOf(s); i>=0?catFilters.styles.splice(i,1):catFilters.styles.push(s); renderCategory(); return; }
+  const yc = e.target.closest("[data-year]");
+  if (yc){ catFilters.year = catFilters.year===yc.dataset.year ? null : yc.dataset.year; catPage = 1; renderCategory(); return; }
+  const rc = e.target.closest("[data-region]");
+  if (rc){ catFilters.region = catFilters.region===rc.dataset.region ? null : rc.dataset.region; catPage = 1; renderCategory(); return; }
+  const sc = e.target.closest("[data-style]");
+  if (sc){ const s=sc.dataset.style; const i=catFilters.styles.indexOf(s); i>=0?catFilters.styles.splice(i,1):catFilters.styles.push(s); catPage = 1; renderCategory(); return; }
 
     // 个人空间：风格兴趣
     const pset = e.target.closest("[data-pset]");
