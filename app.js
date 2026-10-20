@@ -786,6 +786,13 @@ function genreMotif(st, cx, cy, s, wide){
   }
 }
 
+/* 把 SVG 字符串转成最稳的 data URI：base64 不含任何会破坏 CSS background 解析的字符
+   （此前用 encodeURIComponent 直接拼，在部分浏览器里会让整条 background-image 声明失效，
+   连带渐变兜底一起丢失，卡片变空白）。base64 形式 100% 安全。 */
+function svgToDataUri(svg){
+  try { return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg))); }
+  catch(e){ return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); }
+}
 function makePosterPlaceholder(m, wide){
   const w = wide ? 960 : 400, h = wide ? 540 : 600;
   const hue = hueOf(m.id), h2 = (hue + 35) % 360;
@@ -813,16 +820,14 @@ function makePosterPlaceholder(m, wide){
   const badge = `<g><rect x="${cx-96}" y="${badgeY-26}" width="192" height="52" rx="26" fill="rgba(0,0,0,.42)" stroke="rgba(255,255,255,.75)" stroke-width="2"/><text x="${cx}" y="${badgeY+9}" font-size="${wide?30:24}" font-weight="800" fill="#fff" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif">${svgEsc(st)}</text></g>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`
     + `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">`
-    + `<stop offset="0" stop-color="hsl(${hue},48%,40%)"/><stop offset=".55" stop-color="hsl(${(hue+38)%360},52%,24%)"/><stop offset="1" stop-color="hsl(${(hue+78)%360},58%,12%)"/></linearGradient>`
-    + `<radialGradient id="v" cx="50%" cy="36%" r="82%">`
-    + `<stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".52"/></radialGradient>`
-    + `<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>`
-    + `<feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter></defs>`
+    + `<stop offset="0" stop-color="hsl(${hue},52%,46%)"/><stop offset=".5" stop-color="hsl(${(hue+30)%360},56%,30%)"/><stop offset="1" stop-color="hsl(${(hue+75)%360},60%,14%)"/></linearGradient>`
+    + `<radialGradient id="v" cx="50%" cy="34%" r="85%">`
+    + `<stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>`
+    + `</defs>`
     + `<rect width="${w}" height="${h}" fill="url(#g)"/>${badge}${motif}${titleSVG}${metaSVG}`
     + `<rect width="${w}" height="${h}" fill="url(#v)"/>`
-    + `<rect width="${w}" height="${h}" filter="url(#n)" opacity="0.5"/>`
     + `${holes}</svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  return svgToDataUri(svg);
 }
 
 /* ---------- 全站背景：取电影宣传图（模糊 + 低透明度） ---------- */
