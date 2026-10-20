@@ -1246,9 +1246,17 @@ const NEW_MOVIES6 = [
 ];
 MOVIE_DATA = MOVIE_DATA.concat(NEW_MOVIES6);
 
-
-
-
+/* ---------- 虚构补充片标记 ----------
+   以下 id 区间为用“意境词+类型词”批量生成的占位片名（gen4/gen5/gen6，共 300 部），
+   这些影片在任何真实视频平台都不存在正版片源，因此不应对外声称可在某软件观看。
+   统一清空其 platforms 并打 fictional 标记：详情页不再展示任何平台入口（含腾讯/芒果）。 */
+const FICTIONAL_ID_MIN = 9001, FICTIONAL_ID_MAX = 9700;
+MOVIE_DATA.forEach(m => {
+  if (m.id >= FICTIONAL_ID_MIN && m.id <= FICTIONAL_ID_MAX){
+    m.platforms = [];
+    m.fictional = true;
+  }
+});
 
 const MOVIE_MAP = Object.fromEntries(MOVIE_DATA.map(m => [m.id, m]));
 
@@ -1922,8 +1930,10 @@ function renderDetail(id){
   }).join("");
 
   const verified = (m.platforms && m.platforms.length) ? m.platforms : [];
-  // 哔哩哔哩/爱奇艺/优酷：已逐片公开检索核实；腾讯视频/芒果TV：无可用检索接口，默认提供站内搜索
-  const avail = [...new Set([...verified, "tencent", "mgtv"])];
+  // 哔哩哔哩/爱奇艺/优酷：本站收录的“已核实片源”列表（真实影片经人工/检索核对）；
+  // 腾讯视频/芒果TV：两家无可供第三方核验的检索接口，且为非强制项——仅对“已核实片源”影片提供站内搜索入口。
+  // 虚构拓展片（m.fictional）在任何平台均无正版片源，不展示任何平台入口。
+  const avail = m.fictional ? [...new Set(verified)] : [...new Set([...verified, "tencent", "mgtv"])];
   const platformHTML = PLATFORMS.filter(p => avail.includes(p.key)).map(p =>
     `<div class="platform-item">
       <a class="platform" href="${platformLanding(p.name, m.title)}" target="_blank" rel="noopener" style="background:${p.color}">
@@ -1933,10 +1943,15 @@ function renderDetail(id){
     </div>`).join("");
 
   const verifiedNames = PLATFORMS.filter(p => verified.includes(p.key)).map(p=>p.name);
-  const vipFoot = `<br>各平台卡片下方已标注该平台<b>是否需要 VIP / 单片付费</b>（以站内页面为准）。`;
-  const noteHTML = verifiedNames.length
-    ? `<div class="watch-note">哔哩哔哩 / 爱奇艺 / 优酷 已按各站电影专区公开检索逐片核实（本片片源：${verifiedNames.join("、")}）；腾讯视频、芒果TV 未开放可检索接口，默认跳转其站内搜索（点击后在站内搜片名）。${vipFoot}</div>`
-    : `<div class="watch-note">本片在哔哩哔哩 / 爱奇艺 / 优酷 暂未核实到正式片源；腾讯视频、芒果TV 默认跳转其站内搜索（点击后在站内搜片名）。${vipFoot}</div>`;
+  const vipFoot = `<br>各平台按钮均跳转至该平台的<b>站内搜索</b>（以影片名检索），是否可看以平台检索结果为准；卡片下方标注了各平台是否常需 VIP / 单片付费。`;
+  let noteHTML;
+  if (m.fictional){
+    noteHTML = `<div class="watch-note">该影片为站内拓展片单（占位片名，非真实公映影片），<b>未接入任何外部视频平台片源</b>，下方不提供平台入口。${vipFoot}</div>`;
+  } else if (verifiedNames.length){
+    noteHTML = `<div class="watch-note">本片已收录片源平台：<b>${verifiedNames.join("、")}</b>（哔哩哔哩 / 爱奇艺 / 优酷 经核对）；腾讯视频、芒果TV 无第三方核验接口，按钮为站内搜索入口（点击后在站内搜片名）。${vipFoot}</div>`;
+  } else {
+    noteHTML = `<div class="watch-note">本片在哔哩哔哩 / 爱奇艺 / 优酷 暂未核对到片源；下方腾讯视频、芒果TV 为站内搜索入口（点击后在站内搜片名）。${vipFoot}</div>`;
+  }
 
   app.innerHTML = `
     <button class="back-btn" id="backBtn">← 返回</button>
